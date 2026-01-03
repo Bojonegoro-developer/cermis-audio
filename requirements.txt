@@ -1,0 +1,5 @@
+fastapi
+asyncpg
+pydantic
+pydantic-settings
+uvicorn
