@@ -227,7 +227,7 @@ async def home(conn: asyncpg.Connection = Depends(get_conn)):
     # 5. Ambil top 5 cerita per genre
     top_cerita_per_genre = {}
     for g in genres:
-        items = await list_cerita_by_genre(conn, g, per_page=5, offset=0)
+        items = await list_cerita_by_genre(conn, g, limit=5, offset=0)
         if items:
             top_cerita_per_genre[g] = items
 
