@@ -2,6 +2,14 @@ import asyncpg
 from app.schemas import CeritaCreate
 
 
+def row_to_dict(row):
+    return dict(row) if row else None
+
+
+def rows_to_list(rows):
+    return [dict(r) for r in rows]
+
+
 # ==========================
 # CREATE
 # ==========================
@@ -9,7 +17,7 @@ async def create_cerita(
     conn: asyncpg.Connection,
     data: CeritaCreate
 ):
-    return await conn.fetchrow(
+    row = await conn.fetchrow(
         """
         INSERT INTO cerita (
             title,
@@ -19,15 +27,7 @@ async def create_cerita(
             genre
         )
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING
-            id,
-            title,
-            url_thumbnail,
-            url_text,
-            sinopsis,
-            genre,
-            views,
-            created_at;
+        RETURNING *
         """,
         data.title,
         data.url_thumbnail,
@@ -35,6 +35,7 @@ async def create_cerita(
         data.sinopsis,
         data.genre
     )
+    return row_to_dict(row)
 
 
 # ==========================
@@ -47,7 +48,7 @@ async def list_cerita_paginated(
     genre: str | None = None
 ):
     if genre:
-        return await conn.fetch(
+        rows = await conn.fetch(
             """
             SELECT *
             FROM cerita
@@ -59,17 +60,19 @@ async def list_cerita_paginated(
             limit,
             offset
         )
+    else:
+        rows = await conn.fetch(
+            """
+            SELECT *
+            FROM cerita
+            ORDER BY created_at DESC
+            LIMIT $1 OFFSET $2
+            """,
+            limit,
+            offset
+        )
 
-    return await conn.fetch(
-        """
-        SELECT *
-        FROM cerita
-        ORDER BY created_at DESC
-        LIMIT $1 OFFSET $2
-        """,
-        limit,
-        offset
-    )
+    return rows_to_list(rows)
 
 
 async def count_cerita(
@@ -90,7 +93,7 @@ async def count_cerita(
 
 
 # ==========================
-# LIST CERITA PER GENRE (KHUSUS)
+# LIST CERITA PER GENRE
 # ==========================
 async def list_cerita_by_genre(
     conn: asyncpg.Connection,
@@ -98,7 +101,7 @@ async def list_cerita_by_genre(
     limit: int,
     offset: int
 ):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
@@ -110,6 +113,7 @@ async def list_cerita_by_genre(
         limit,
         offset
     )
+    return rows_to_list(rows)
 
 
 async def count_cerita_by_genre(
@@ -133,10 +137,11 @@ async def get_cerita_by_id(
     conn: asyncpg.Connection,
     cerita_id: int
 ):
-    return await conn.fetchrow(
+    row = await conn.fetchrow(
         "SELECT * FROM cerita WHERE id = $1",
         cerita_id
     )
+    return row_to_dict(row)
 
 
 # ==========================
@@ -146,15 +151,16 @@ async def add_view_counter(
     conn: asyncpg.Connection,
     cerita_id: int
 ):
-    return await conn.fetchrow(
+    row = await conn.fetchrow(
         """
         UPDATE cerita
         SET views = views + 1
         WHERE id = $1
-        RETURNING views
+        RETURNING id, views
         """,
         cerita_id
     )
+    return row_to_dict(row)
 
 
 # ==========================
@@ -164,7 +170,7 @@ async def list_cerita_terbaru(
     conn: asyncpg.Connection,
     limit: int
 ):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
@@ -173,6 +179,7 @@ async def list_cerita_terbaru(
         """,
         limit
     )
+    return rows_to_list(rows)
 
 
 # ==========================
@@ -182,7 +189,7 @@ async def cerita_populer_mingguan(
     conn: asyncpg.Connection,
     limit: int
 ):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
@@ -192,13 +199,14 @@ async def cerita_populer_mingguan(
         """,
         limit
     )
+    return rows_to_list(rows)
 
 
 async def cerita_populer_bulanan(
     conn: asyncpg.Connection,
     limit: int
 ):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
@@ -208,6 +216,7 @@ async def cerita_populer_bulanan(
         """,
         limit
     )
+    return rows_to_list(rows)
 
 
 # ==========================
@@ -219,7 +228,7 @@ async def search_cerita(
     limit: int,
     offset: int
 ):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
@@ -232,6 +241,7 @@ async def search_cerita(
         limit,
         offset
     )
+    return rows_to_list(rows)
 
 
 async def count_search_cerita(
@@ -253,10 +263,11 @@ async def count_search_cerita(
 # ALL GENRE
 # ==========================
 async def get_all_genre(conn: asyncpg.Connection):
-    return await conn.fetch(
+    rows = await conn.fetch(
         """
         SELECT DISTINCT UNNEST(genre) AS genre
         FROM cerita
         ORDER BY genre ASC
         """
     )
+    return rows_to_list(rows)
