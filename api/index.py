@@ -17,6 +17,8 @@ from app.crud import (
     list_cerita_terbaru,
     cerita_populer_mingguan,
     cerita_populer_bulanan,
+    rekomendasi_cerita,
+    count_rekomendasi,
     search_cerita,
     count_search_cerita
 )
