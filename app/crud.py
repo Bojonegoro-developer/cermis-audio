@@ -271,3 +271,46 @@ async def get_all_genre(conn: asyncpg.Connection):
         """
     )
     return rows_to_list(rows)
+
+
+# ==========================
+# REKOMENDASI (OTOMATIS)
+# ==========================
+def _freshness(created_at):
+    days = (datetime.utcnow() - created_at).days
+    return max(0, 30 - days)
+
+
+def _genre_popularity(rows):
+    counter = Counter()
+    for r in rows:
+        for g in r["genre"]:
+            counter[g] += r["views"]
+    return counter
+
+
+async def rekomendasi_cerita(
+    conn: asyncpg.Connection,
+    limit: int,
+    offset: int
+):
+    rows = await conn.fetch(
+        "SELECT * FROM cerita"
+    )
+    data = rows_to_list(rows)
+
+    genre_score = _genre_popularity(data)
+
+    for r in data:
+        r["score"] = (
+            r["views"] * 0.6 +
+            _freshness(r["created_at"]) * 0.3 +
+            sum(genre_score[g] for g in r["genre"]) * 0.1
+        )
+
+    data.sort(key=lambda x: x["score"], reverse=True)
+    return data[offset: offset + limit]
+
+
+async def count_rekomendasi(conn):
+    return await conn.fetchval("SELECT COUNT(*) FROM cerita")
