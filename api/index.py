@@ -214,13 +214,13 @@ async def home(
     conn: asyncpg.Connection = Depends(get_conn)
 ):
     # 1. 10 cerita terbaru
-    terbaru = await list_cerita_terbaru(conn, limit=10)
+    terbaru = await list_cerita_terbaru(conn, limit=4)
 
     # 2. 10 cerita populer mingguan
-    populer_mingguan = await cerita_populer_mingguan(conn, limit=10)
+    populer_mingguan = await cerita_populer_mingguan(conn, limit=4)
 
     # 3. 10 cerita populer bulanan
-    populer_bulanan = await cerita_populer_bulanan(conn, limit=10)
+    populer_bulanan = await cerita_populer_bulanan(conn, limit=4)
 
     # 4. Ambil semua genre
     genre_rows = await get_all_genre(conn)
@@ -232,7 +232,7 @@ async def home(
         items = await list_cerita_by_genre(
             conn,
             genre=genre,
-            limit=5,
+            limit=4,
             offset=0
         )
         if items:
@@ -242,14 +242,17 @@ async def home(
     return {
         "terbaru": {
             "nama": "Terbaru",
+            "lihat": "Lainnya",
             "items": terbaru
         },
         "populer_mingguan": {
             "nama": "Populer Mingguan",
+            "lihat": "Lainnya",
             "items": populer_mingguan
         },
         "populer_bulanan": {
             "nama": "Populer Bulanan",
+            "lihat": "Lainnya",
             "items": populer_bulanan
         },
         "genres": genres,
