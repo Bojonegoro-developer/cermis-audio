@@ -210,34 +210,52 @@ async def genre_list(
 # HOME DENGAN CERITA PER GENRE
 # ==========================
 @app.get("/home")
-async def home(conn: asyncpg.Connection = Depends(get_conn)):
+async def home(
+    conn: asyncpg.Connection = Depends(get_conn)
+):
     # 1. 10 cerita terbaru
     terbaru = await list_cerita_terbaru(conn, limit=10)
-    
+
     # 2. 10 cerita populer mingguan
-    populer_minggu = await cerita_populer_mingguan(conn, limit=10)
-    
+    populer_mingguan = await cerita_populer_mingguan(conn, limit=10)
+
     # 3. 10 cerita populer bulanan
-    populer_bulan = await cerita_populer_bulanan(conn, limit=10)
-    
-    # 4. Daftar genre
+    populer_bulanan = await cerita_populer_bulanan(conn, limit=10)
+
+    # 4. Ambil semua genre
     genre_rows = await get_all_genre(conn)
     genres = [row["genre"] for row in genre_rows]
 
-    # 5. Ambil top 5 cerita per genre
+    # 5. Top 5 cerita per genre
     top_cerita_per_genre = {}
-    for g in genres:
-        items = await list_cerita_by_genre(conn, g, limit=5, offset=0)
+    for genre in genres:
+        items = await list_cerita_by_genre(
+            conn,
+            genre=genre,
+            limit=5,
+            offset=0
+        )
         if items:
-            top_cerita_per_genre[g] = items
+            top_cerita_per_genre[genre] = items
 
+    # RESPONSE FINAL
     return {
-        "terbaru": terbaru,
-        "populer_mingguan": populer_minggu,
-        "populer_bulanan": populer_bulan,
+        "terbaru": {
+            "nama": "Terbaru",
+            "items": terbaru
+        },
+        "populer_mingguan": {
+            "nama": "Populer Mingguan",
+            "items": populer_mingguan
+        },
+        "populer_bulanan": {
+            "nama": "Populer Bulanan",
+            "items": populer_bulanan
+        },
         "genres": genres,
         "top_cerita_per_genre": top_cerita_per_genre
     }
+
 
 
 
