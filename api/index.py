@@ -165,6 +165,26 @@ async def cerita_cari(
         "items": items
     }
 
+# ==========================
+# REKOMENDASI (PAGINATION)
+# ==========================
+@app.get("/cerita/rekomendasi")
+async def rekomendasi(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=50),
+    conn: asyncpg.Connection = Depends(get_conn)
+):
+    offset = (page - 1) * per_page
+    items = await rekomendasi_cerita(conn, per_page, offset)
+    total = await count_rekomendasi(conn)
+
+    return {
+        "page": page,
+        "per_page": per_page,
+        "total_items": total,
+        "total_pages": (total + per_page - 1) // per_page,
+        "items": items
+    }
 
 # ==========================
 # DETAIL
@@ -206,26 +226,7 @@ async def genre_list(
     return {"items": [row["genre"] for row in rows]}
 
 
-# ==========================
-# REKOMENDASI (PAGINATION)
-# ==========================
-@app.get("/cerita/rekomendasi")
-async def rekomendasi(
-    page: int = Query(1, ge=1),
-    per_page: int = Query(10, ge=1, le=50),
-    conn: asyncpg.Connection = Depends(get_conn)
-):
-    offset = (page - 1) * per_page
-    items = await rekomendasi_cerita(conn, per_page, offset)
-    total = await count_rekomendasi(conn)
 
-    return {
-        "page": page,
-        "per_page": per_page,
-        "total_items": total,
-        "total_pages": (total + per_page - 1) // per_page,
-        "items": items
-    }
 
 
 # ==========================
