@@ -207,6 +207,28 @@ async def genre_list(
 
 
 # ==========================
+# REKOMENDASI (PAGINATION)
+# ==========================
+@app.get("/cerita/rekomendasi")
+async def rekomendasi(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(10, ge=1, le=50),
+    conn: asyncpg.Connection = Depends(get_conn)
+):
+    offset = (page - 1) * per_page
+    items = await rekomendasi_cerita(conn, per_page, offset)
+    total = await count_rekomendasi(conn)
+
+    return {
+        "page": page,
+        "per_page": per_page,
+        "total_items": total,
+        "total_pages": (total + per_page - 1) // per_page,
+        "items": items
+    }
+
+
+# ==========================
 # HOME DENGAN CERITA PER GENRE
 # ==========================
 @app.get("/home")
@@ -221,12 +243,15 @@ async def home(
 
     # 3. 10 cerita populer bulanan
     populer_bulanan = await cerita_populer_bulanan(conn, limit=4)
+    
+    # 4. 10 cerita populer bulanan
+    rekomendasi_items = await rekomendasi_cerita(conn, 4, 0)
 
-    # 4. Ambil semua genre
+    # 5. Ambil semua genre
     genre_rows = await get_all_genre(conn)
     genres = [row["genre"] for row in genre_rows]
 
-    # 5. Top 5 cerita per genre
+    # 6. Top 4 cerita per genre
     top_cerita_per_genre = {}
     for genre in genres:
         items = await list_cerita_by_genre(
@@ -238,7 +263,7 @@ async def home(
         if items:
             top_cerita_per_genre[genre] = items
 
-    # RESPONSE FINAL
+    # RESPONSE 
     return {
         "terbaru": {
             "nama": "Terbaru",
@@ -255,12 +280,14 @@ async def home(
             "lihat": "Lainnya",
             "items": populer_bulanan
         },
+        "rekomendasi":{
+            "nama": "Rekomendasi",
+            "lihat"; "Lainnya",
+            "items": rekomendasi_items
+        },
         "genres": genres,
         "top_cerita_per_genre": top_cerita_per_genre
     }
-
-
-
 
 @app.get("/")
 async def health():
