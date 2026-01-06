@@ -282,7 +282,7 @@ async def home(
         },
         "rekomendasi":{
             "nama": "Rekomendasi",
-            "lihat"; "Lainnya",
+            "lihat": "Lainnya",
             "items": rekomendasi_items
         },
         "genres": genres,
