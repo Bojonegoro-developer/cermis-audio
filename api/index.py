@@ -270,21 +270,25 @@ async def home(
         "terbaru": {
             "nama": "Terbaru",
             "lihat": "Lainnya",
+            "url_lain":"/cerita/terbaru",
             "items": terbaru
         },
         "populer_mingguan": {
             "nama": "Populer Mingguan",
             "lihat": "Lainnya",
+            "url_lain": "/cerita/populer/mingguan",
             "items": populer_mingguan
         },
         "populer_bulanan": {
             "nama": "Populer Bulanan",
             "lihat": "Lainnya",
+            "url_lain": "/cerita/populer/bulanan",
             "items": populer_bulanan
         },
         "rekomendasi":{
             "nama": "Rekomendasi",
             "lihat": "Lainnya",
+            "url_lain": "/cerita/rekomendasi",
             "items": rekomendasi_items
         },
         "genres": genres,
