@@ -4,6 +4,9 @@ from datetime import datetime
 from app.schemas import CeritaCreate
 
 
+# ==========================
+# HELPER
+# ==========================
 def row_to_dict(row):
     return dict(row) if row else None
 
@@ -185,22 +188,36 @@ async def list_cerita_terbaru(
 
 
 # ==========================
-# POPULER
+# POPULER (AMAN & TIDAK KOSONG)
 # ==========================
 async def cerita_populer_mingguan(
     conn: asyncpg.Connection,
     limit: int
 ):
+    # 1️⃣ Coba cerita 7 hari terakhir
     rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
         WHERE created_at >= NOW() - INTERVAL '7 days'
-        ORDER BY views DESC
+        ORDER BY views DESC, created_at DESC
         LIMIT $1
         """,
         limit
     )
+
+    # 2️⃣ Jika kosong → fallback ke populer global
+    if not rows:
+        rows = await conn.fetch(
+            """
+            SELECT *
+            FROM cerita
+            ORDER BY views DESC, created_at DESC
+            LIMIT $1
+            """,
+            limit
+        )
+
     return rows_to_list(rows)
 
 
@@ -208,16 +225,30 @@ async def cerita_populer_bulanan(
     conn: asyncpg.Connection,
     limit: int
 ):
+    # 1️⃣ Coba cerita 30 hari terakhir
     rows = await conn.fetch(
         """
         SELECT *
         FROM cerita
         WHERE created_at >= NOW() - INTERVAL '30 days'
-        ORDER BY views DESC
+        ORDER BY views DESC, created_at DESC
         LIMIT $1
         """,
         limit
     )
+
+    # 2️⃣ Jika kosong → fallback ke populer global
+    if not rows:
+        rows = await conn.fetch(
+            """
+            SELECT *
+            FROM cerita
+            ORDER BY views DESC, created_at DESC
+            LIMIT $1
+            """,
+            limit
+        )
+
     return rows_to_list(rows)
 
 
@@ -296,9 +327,7 @@ async def rekomendasi_cerita(
     limit: int,
     offset: int
 ):
-    rows = await conn.fetch(
-        "SELECT * FROM cerita"
-    )
+    rows = await conn.fetch("SELECT * FROM cerita")
     data = rows_to_list(rows)
 
     genre_score = _genre_popularity(data)
