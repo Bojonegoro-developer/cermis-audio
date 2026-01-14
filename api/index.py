@@ -61,6 +61,30 @@ async def upload(
         raise HTTPException(409, "Data sudah ada")
 
 
+@app.get("/splashscreen")
+async def cek_neon_tech(
+    conn: asyncpg.Connection = Depends(get_conn)
+):
+    try:
+        # Cek apakah tabel cerita bisa diakses
+        await conn.fetchval("SELECT 1 FROM cerita LIMIT 1")
+
+        return {
+            "status": "ok",
+            "db": "connected"
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "message": str(e)
+            }
+        )
+
+
+
 # ==========================
 # LIST CERITA GLOBAL
 # ==========================
