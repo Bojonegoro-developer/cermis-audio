@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, Query 
 import asyncpg
 from asyncpg.exceptions import UniqueViolationError
-import os 
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+import os
 
 from app.config import settings
 from app.database import get_pool, init_db
@@ -29,9 +31,16 @@ app = FastAPI(
     version=settings.APP_VERSION,
     root_path="/api"
 )
-
-
 pool: asyncpg.Pool | None = None
+
+
+# Mount folder static
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Route khusus untuk policy.html
+@app.get("/policy.html")
+async def policy():
+    return FileResponse(os.path.join("static", "policy.html"))
 
 
 @app.on_event("startup")
