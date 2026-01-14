@@ -34,12 +34,14 @@ app = FastAPI(
 # Akses: /public/policy.html
 # =====================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_DIR = os.path.join(BASE_DIR, "..", "public")
 
-app.mount(
-    "/public",
-    StaticFiles(directory=os.path.join(BASE_DIR, "..", "public")),
-    name="public"
-)
+if os.path.isdir(PUBLIC_DIR):
+    app.mount(
+        "/static",
+        StaticFiles(directory=PUBLIC_DIR),
+        name="static"
+    )
 # =====================================================
 
 pool: asyncpg.Pool | None = None
