@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, Query
+from fastapi.staticfiles import StaticFiles 
 import asyncpg
 from asyncpg.exceptions import UniqueViolationError
+import os 
 
 from app.config import settings
 from app.database import get_pool, init_db
@@ -27,6 +29,18 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION
 )
+
+# =====================================================
+# Akses: /public/policy.html
+# =====================================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app.mount(
+    "/public",
+    StaticFiles(directory=os.path.join(BASE_DIR, "..", "public")),
+    name="public"
+)
+# =====================================================
 
 pool: asyncpg.Pool | None = None
 
@@ -61,30 +75,6 @@ async def upload(
         raise HTTPException(409, "Data sudah ada")
 
 
-@app.get("/splashscreen")
-async def cek_neon_tech(
-    conn: asyncpg.Connection = Depends(get_conn)
-):
-    try:
-        # Cek apakah tabel cerita bisa diakses
-        await conn.fetchval("SELECT 1 FROM cerita LIMIT 1")
-
-        return {
-            "status": "ok",
-            "db": "connected"
-        }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "status": "error",
-                "message": str(e)
-            }
-        )
-
-
-
 # ==========================
 # LIST CERITA GLOBAL
 # ==========================
@@ -112,7 +102,7 @@ async def cerita_list(
 
 
 # ==========================
-# LIST CERITA PER GENRE (🔥 INI YANG KAMU MINTA)
+# LIST CERITA PER GENRE
 # ==========================
 @app.get("/genre/{genre}/cerita")
 async def cerita_per_genre(
@@ -168,7 +158,7 @@ async def populer_bulanan(
 
 
 # ==========================
-# REKOMENDASI (PAGINATION)
+# REKOMENDASI
 # ==========================
 @app.get("/cerita/rekomendasi")
 async def rekomendasi(
@@ -255,69 +245,35 @@ async def genre_list(
 
 
 # ==========================
-# HOME DENGAN CERITA PER GENRE
+# HOME
 # ==========================
 @app.get("/home")
 async def home(
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    # 1. 10 cerita terbaru
     terbaru = await list_cerita_terbaru(conn, limit=4)
-
-    # 2. 10 cerita populer mingguan
     populer_mingguan = await cerita_populer_mingguan(conn, limit=4)
-
-    # 3. 10 cerita populer bulanan
     populer_bulanan = await cerita_populer_bulanan(conn, limit=4)
-    
-    # 4. 10 cerita populer bulanan
     rekomendasi_items = await rekomendasi_cerita(conn, 4, 0)
 
-    # 5. Ambil semua genre
     genre_rows = await get_all_genre(conn)
     genres = [row["genre"] for row in genre_rows]
 
-    # 6. Top 4 cerita per genre
     top_cerita_per_genre = {}
     for genre in genres:
-        items = await list_cerita_by_genre(
-            conn,
-            genre=genre,
-            limit=4,
-            offset=0
-        )
+        items = await list_cerita_by_genre(conn, genre, 4, 0)
         if items:
             top_cerita_per_genre[genre] = items
 
-    # RESPONSE 
     return {
-        "terbaru": {
-            "nama": "Terbaru",
-            "lihat": "Lainnya",
-            "url_lain":"/cerita/terbaru",
-            "items": terbaru
-        },
-        "populer_mingguan": {
-            "nama": "Populer Mingguan",
-            "lihat": "Lainnya",
-            "url_lain": "/cerita/populer/mingguan",
-            "items": populer_mingguan
-        },
-        "populer_bulanan": {
-            "nama": "Populer Bulanan",
-            "lihat": "Lainnya",
-            "url_lain": "/cerita/populer/bulanan",
-            "items": populer_bulanan
-        },
-        "rekomendasi":{
-            "nama": "Rekomendasi",
-            "lihat": "Lainnya",
-            "url_lain": "/cerita/rekomendasi",
-            "items": rekomendasi_items
-        },
+        "terbaru": {"nama": "Terbaru", "lihat": "Lainnya", "url_lain": "/cerita/terbaru", "items": terbaru},
+        "populer_mingguan": {"nama": "Populer Mingguan", "lihat": "Lainnya", "url_lain": "/cerita/populer/mingguan", "items": populer_mingguan},
+        "populer_bulanan": {"nama": "Populer Bulanan", "lihat": "Lainnya", "url_lain": "/cerita/populer/bulanan", "items": populer_bulanan},
+        "rekomendasi": {"nama": "Rekomendasi", "lihat": "Lainnya", "url_lain": "/cerita/rekomendasi", "items": rekomendasi_items},
         "genres": genres,
         "top_cerita_per_genre": top_cerita_per_genre
     }
+
 
 @app.get("/")
 async def health():
