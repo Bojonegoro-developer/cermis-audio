@@ -1,5 +1,4 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, Query
-from fastapi.staticfiles import StaticFiles 
+from fastapi import FastAPI, Depends, Header, HTTPException, Query 
 import asyncpg
 from asyncpg.exceptions import UniqueViolationError
 import os 
@@ -29,20 +28,6 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION
 )
-
-# =====================================================
-# Akses: /public/policy.html
-# =====================================================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PUBLIC_DIR = os.path.join(BASE_DIR, "..", "public")
-
-if os.path.isdir(PUBLIC_DIR):
-    app.mount(
-        "/static",
-        StaticFiles(directory=PUBLIC_DIR),
-        name="static"
-    )
-# =====================================================
 
 pool: asyncpg.Pool | None = None
 
