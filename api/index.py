@@ -26,8 +26,10 @@ from app.crud import (
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version=settings.APP_VERSION
+    version=settings.APP_VERSION,
+    root_path="/api"
 )
+
 
 pool: asyncpg.Pool | None = None
 
