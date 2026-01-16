@@ -261,8 +261,15 @@ async def home(
         items = await list_cerita_by_genre(conn, genre, 4, 0)
         if items:
             top_cerita_per_genre[genre] = items
+    menu = [
+        {"nama": "Menu 1", "icon": "/static/menu1.png"},
+        {"nama": "Menu 2", "icon": "/static/menu2.png"},
+        {"nama": "Menu 3", "icon": "/static/menu3.png"},
+        {"nama": "Menu 4", "icon": "/static/menu4.png"}
+    ]
 
     return {
+        "menu": menu,
         "terbaru": {"nama": "Terbaru", "lihat": "Lainnya", "url_lain": "/cerita/terbaru", "items": terbaru},
         "populer_mingguan": {"nama": "Populer Mingguan", "lihat": "Lainnya", "url_lain": "/cerita/populer/mingguan", "items": populer_mingguan},
         "populer_bulanan": {"nama": "Populer Bulanan", "lihat": "Lainnya", "url_lain": "/cerita/populer/bulanan", "items": populer_bulanan},
