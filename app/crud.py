@@ -186,6 +186,39 @@ async def list_cerita_terbaru(
     )
     return rows_to_list(rows)
 
+# ==========================
+# POPULER (AMAN & TIDAK KOSONG)
+# ==========================
+async def cerita_populer_harian(
+    conn: asyncpg.Connection,
+    limit: int
+):
+    # 1️⃣ Coba cerita 1 hari terakhir
+    rows = await conn.fetch(
+        """
+        SELECT *
+        FROM cerita
+        WHERE created_at >= NOW() - INTERVAL '1 days'
+        ORDER BY views DESC, created_at DESC
+        LIMIT $1
+        """,
+        limit
+    )
+
+    # 2️⃣ Jika kosong → fallback ke populer global
+    if not rows:
+        rows = await conn.fetch(
+            """
+            SELECT *
+            FROM cerita
+            ORDER BY views DESC, created_at DESC
+            LIMIT $1
+            """,
+            limit
+        )
+
+    return rows_to_list(rows)
+
 
 # ==========================
 # POPULER (AMAN & TIDAK KOSONG)
