@@ -140,7 +140,7 @@ async def cerita_terbaru(
 # POPULER
 # ==========================
 @app.get("/cerita/populer/harian")
-async def populer_mingguan(
+async def populer_harian(
     limit: int = Query(10, ge=1, le=50),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
