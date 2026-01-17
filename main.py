@@ -256,11 +256,37 @@ async def home(
     genre_rows = await get_all_genre(conn)
     genres = [row["genre"] for row in genre_rows]
 
+    # ==========================
+    # SLIDER (TAMBAHAN BARU)
+    # ==========================
+    slider = []
+    used_ids = set()
+
+    for genre in genres:
+        # Ambil beberapa kandidat agar bisa fallback ke peringkat 2, 3, dst
+        candidates = await list_cerita_by_genre(conn, genre, 5, 0)
+
+        for cerita in candidates:
+            cid = cerita["id"]
+            if cid not in used_ids:
+                item = dict(cerita)
+                item["url"] = f"/cerita/{cid}"
+                slider.append(item)
+                used_ids.add(cid)
+                break
+
+        if len(slider) >= 5:
+            break
+
+    # ==========================
+    # TOP CERITA PER GENRE (KODE ASLI, TIDAK DIUBAH)
+    # ==========================
     top_cerita_per_genre = {}
     for genre in genres:
         items = await list_cerita_by_genre(conn, genre, 4, 0)
         if items:
             top_cerita_per_genre[genre] = items
+
     menu = [
         {"nama": "Menu 1", "icon": "/static/menu1.png"},
         {"nama": "Menu 2", "icon": "/static/menu2.png"},
@@ -270,6 +296,10 @@ async def home(
 
     return {
         "menu": menu,
+        "slider": {
+            "nama": "Pilihan Editor",
+            "items": slider
+        },
         "terbaru": {"nama": "Terbaru", "lihat": "Lainnya", "url_lain": "/cerita/terbaru", "items": terbaru},
         "populer_mingguan": {"nama": "Populer Mingguan", "lihat": "Lainnya", "url_lain": "/cerita/populer/mingguan", "items": populer_mingguan},
         "populer_bulanan": {"nama": "Populer Bulanan", "lihat": "Lainnya", "url_lain": "/cerita/populer/bulanan", "items": populer_bulanan},
