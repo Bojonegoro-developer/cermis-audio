@@ -17,7 +17,8 @@ from app.crud import (
     get_cerita_by_id,
     add_view_counter,
     get_all_genre,
-    list_cerita_terbaru,
+    list_cerita_terbaru, 
+    cerita_populer_harian,
     cerita_populer_mingguan,
     cerita_populer_bulanan,
     rekomendasi_cerita,
@@ -138,6 +139,13 @@ async def cerita_terbaru(
 # ==========================
 # POPULER
 # ==========================
+@app.get("/cerita/populer/harian")
+async def populer_mingguan(
+    limit: int = Query(10, ge=1, le=50),
+    conn: asyncpg.Connection = Depends(get_conn)
+):
+    return {"items": await cerita_populer_harian(conn, limit)}
+
 @app.get("/cerita/populer/mingguan")
 async def populer_mingguan(
     limit: int = Query(10, ge=1, le=50),
@@ -249,6 +257,7 @@ async def home(
     conn: asyncpg.Connection = Depends(get_conn)
 ):
     terbaru = await list_cerita_terbaru(conn, limit=4)
+    populer_harian = await cerita_populer_harian(conn, limit=4)
     populer_mingguan = await cerita_populer_mingguan(conn, limit=4)
     populer_bulanan = await cerita_populer_bulanan(conn, limit=4)
     rekomendasi_items = await rekomendasi_cerita(conn, 4, 0)
@@ -301,6 +310,7 @@ async def home(
             "items": slider
         },
         "terbaru": {"nama": "Terbaru", "lihat": "Lainnya", "url_lain": "/cerita/terbaru", "items": terbaru},
+        "populer_harian": {"nama": "Populer Harian", "lihat": "Lainnya", "url_lain": "/cerita/populer/harian", "items": populer_harian},
         "populer_mingguan": {"nama": "Populer Mingguan", "lihat": "Lainnya", "url_lain": "/cerita/populer/mingguan", "items": populer_mingguan},
         "populer_bulanan": {"nama": "Populer Bulanan", "lihat": "Lainnya", "url_lain": "/cerita/populer/bulanan", "items": populer_bulanan},
         "rekomendasi": {"nama": "Rekomendasi", "lihat": "Lainnya", "url_lain": "/cerita/rekomendasi", "items": rekomendasi_items},
