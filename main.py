@@ -297,10 +297,10 @@ async def home(
             top_cerita_per_genre[genre] = items
 
     menu = [
-        {"nama": "Menu 1", "icon": "/static/menu1.png"},
-        {"nama": "Menu 2", "icon": "/static/menu2.png"},
-        {"nama": "Menu 3", "icon": "/static/menu3.png"},
-        {"nama": "Menu 4", "icon": "/static/menu4.png"}
+        {"nama": "Menu 1", "icon": "/static/icon/menu1.png"},
+        {"nama": "Menu 2", "icon": "/static/icon/menu2.png"},
+        {"nama": "Menu 3", "icon": "/static/icon/menu3.png"},
+        {"nama": "Menu 4", "icon": "/static/icon/menu4.png"}
     ]
 
     return {
