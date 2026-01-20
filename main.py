@@ -135,7 +135,7 @@ async def cerita_terbaru(
 ):
     items = await list_cerita_terbaru(conn, limit)
 
-    background = items[0]["cover"] if items else None
+    background = items[0]["url_thumbnail"] if items else None
 
     return {
         "nama": "Terbaru",
@@ -155,7 +155,7 @@ async def populer_harian(
 ):
     items = await cerita_populer_harian(conn, limit)
 
-    background = items[0]["cover"] if items else None
+    background = items[0]["url_thumbnail"] if items else None
 
     return {
         "nama": "Populer Harian",
@@ -171,7 +171,7 @@ async def populer_mingguan(
 ):
     items = await cerita_populer_mingguan(conn, limit)
 
-    background = items[0]["cover"] if items else None
+    background = items[0]["url_thumbnail"] if items else None
 
     return {
         "nama": "Populer Mingguan",
@@ -189,7 +189,7 @@ async def populer_bulanan(
 ):
     items = await cerita_populer_bulanan(conn, limit)
 
-    background = items[0]["cover"] if items else None
+    background = items[0]["url_thumbnail"] if items else None
 
     return {
         "nama": "Populer Bulanan",
