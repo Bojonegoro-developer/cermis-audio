@@ -133,7 +133,16 @@ async def cerita_terbaru(
     limit: int = Query(10, ge=1, le=50),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    return {"items": await list_cerita_terbaru(conn, limit)}
+    items = await list_cerita_terbaru(conn, limit)
+
+    background = items[0]["cover"] if items else None
+
+    return {
+        "nama": "Terbaru",
+        "deskripsi": "Temukan 10 cerita terbaru yang baru release",
+        "background": background,
+        "items": items
+    }
 
 
 # ==========================
@@ -144,14 +153,33 @@ async def populer_harian(
     limit: int = Query(10, ge=1, le=50),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    return {"items": await cerita_populer_harian(conn, limit)}
+    items = await cerita_populer_harian(conn, limit)
+
+    background = items[0]["cover"] if items else None
+
+    return {
+        "nama": "Populer Harian",
+        "deskripsi": "Cerita paling banyak dibaca hari ini",
+        "background": background,
+        "items": items
+    }
 
 @app.get("/cerita/populer/mingguan")
 async def populer_mingguan(
     limit: int = Query(10, ge=1, le=50),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    return {"items": await cerita_populer_mingguan(conn, limit)}
+    items = await cerita_populer_mingguan(conn, limit)
+
+    background = items[0]["cover"] if items else None
+
+    return {
+        "nama": "Populer Mingguan",
+        "deskripsi": "Cerita paling populer dalam 7 hari terakhir",
+        "background": background,
+        "items": items
+    }
+
 
 
 @app.get("/cerita/populer/bulanan")
@@ -159,7 +187,16 @@ async def populer_bulanan(
     limit: int = Query(10, ge=1, le=50),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    return {"items": await cerita_populer_bulanan(conn, limit)}
+    items = await cerita_populer_bulanan(conn, limit)
+
+    background = items[0]["cover"] if items else None
+
+    return {
+        "nama": "Populer Bulanan",
+        "deskripsi": "Cerita paling banyak dibaca bulan ini",
+        "background": background,
+        "items": items
+    }
 
 
 # ==========================
