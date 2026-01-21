@@ -283,10 +283,28 @@ async def cerita_view_counter(
 async def genre_list(
     conn: asyncpg.Connection = Depends(get_conn)
 ):
+    # Ambil semua nama genre dari tabel cerita
     rows = await get_all_genre(conn)
-    return {"items": [row["genre"] for row in rows]}
+    genre_names = [row["genre"] for row in rows]
+    
+    # Siapkan data untuk UI: nama, deskripsi default, background dari cerita pertama
+    genre_data = []
+    for genre in genre_names:
+        # Ambil cerita pertama dari genre ini untuk background
+        cerita_pertama = await list_cerita_by_genre(conn, genre, 1, 0)
+        background_url = cerita_pertama[0]["url_thumbnail"] 
+        
+        # Deskripsi default sesuai nama genre
+        deskripsi = f"Kumpulan cerita {genre} terbaik dan paling menarik untuk kamu nikmati."
+        
+        genre_data.append({
+            "nama": genre,
+            "deskripsi": deskripsi,
+            "background_url": background_url
+        })
 
-
+    return {"items": genre_data}
+    
 # ==========================
 # HOME
 # ==========================
