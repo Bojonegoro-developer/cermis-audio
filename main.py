@@ -204,22 +204,19 @@ async def populer_bulanan(
 # ==========================
 @app.get("/cerita/rekomendasi")
 async def rekomendasi(
-    page: int = Query(1, ge=1),
-    per_page: int = Query(10, ge=1, le=50),
+    limit: int = Query(50, ge=1, le=100),
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    offset = (page - 1) * per_page
-    items = await rekomendasi_cerita(conn, per_page, offset)
-    total = await count_rekomendasi(conn)
+    items = await rekomendasi_cerita(conn, limit)
+
+    background = items[0]["url_thumbnail"] if items else None
 
     return {
-        "page": page,
-        "per_page": per_page,
-        "total_items": total,
-        "total_pages": (total + per_page - 1) // per_page,
+        "nama": "Rekomendasi",
+        "deskripsi": "Dengarkan 50 cerita rekomendasi dari kami",
+        "background": background,
         "items": items
     }
-
 
 # ==========================
 # SEARCH
