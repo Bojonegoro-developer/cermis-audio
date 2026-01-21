@@ -205,19 +205,22 @@ async def populer_bulanan(
 @app.get("/cerita/rekomendasi")
 async def rekomendasi(
     limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    offset: int = Query(0, ge=0),  # Tambahkan parameter offset dengan nilai default 0
     conn: asyncpg.Connection = Depends(get_conn)
 ):
-    items = await rekomendasi_cerita(conn, limit)
+    # Kirimkan semua 3 argumen yang dibutuhkan ke fungsi rekomendasi_cerita
+    items = await rekomendasi_cerita(conn, limit, offset)
 
     background = items[0]["url_thumbnail"] if items else None
 
     return {
         "nama": "Rekomendasi",
-        "deskripsi": "Dengarkan 50 cerita rekomendasi dari kami",
+        # Sesuaikan deskripsi dengan nilai limit yang dipilih pengguna
+        "deskripsi": f"Dengarkan {limit} cerita rekomendasi dari kami",
         "background": background,
         "items": items
     }
+
 
 # ==========================
 # SEARCH
