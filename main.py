@@ -89,14 +89,27 @@ async def cerita_list(
     total_items = await count_cerita(conn, genre)
     total_pages = (total_items + per_page - 1) // per_page
 
+    # Ambil background dari halaman pertama item pertama
+    first_page_items = await list_cerita_paginated(conn, per_page, 0, genre)
+    background = first_page_items[0]["url_thumbnail"] if first_page_items else None
+
+    # Deskripsi global, selalu sama formatnya
+    deskripsi = (
+        f"Temukan petualangan dan kisah seru di {total_items} cerita yang bisa kamu baca sekarang! "
+        "Setiap halaman menawarkan pengalaman baru yang tak terlupakan."
+    )
+
     return {
         "page": page,
         "per_page": per_page,
         "total_items": total_items,
         "total_pages": total_pages,
         "genre": genre,
+        "background": background,
+        "deskripsi": deskripsi,
         "items": items
     }
+
 
 
 # ==========================
