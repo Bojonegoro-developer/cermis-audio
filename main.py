@@ -369,7 +369,8 @@ async def home(
         {"nama": "Semua", "icon": "/static/icon/menu1.jpg"},
         {"nama": "Genre", "icon": "/static/icon/menu2.jpg"},
         {"nama": "Policy", "icon": "/static/icon/menu3.jpg"},
-        {"nama": "Cari Cerita", "icon": "/static/icon/menu4.jpg"}
+        {"nama": "Cari Cerita", "icon": "/static/icon/menu4.jpg"},
+        {"nama": "Suara", "icon": "/static/icon/menu5.jpg"}
         
     ]
 
