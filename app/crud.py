@@ -150,12 +150,17 @@ async def get_cerita_by_id(
 
 
 # ==========================
-# VIEW +1
+# VIEW +1 (DIPERBAIKI)
 # ==========================
 async def add_view_counter(
     conn: asyncpg.Connection,
     cerita_id: int
 ):
+    await conn.execute(
+        "INSERT INTO cerita_views_log (cerita_id) VALUES ($1)",
+        cerita_id
+    )
+
     row = await conn.fetchrow(
         """
         UPDATE cerita
@@ -186,71 +191,47 @@ async def list_cerita_terbaru(
     )
     return rows_to_list(rows)
 
+
 # ==========================
-# POPULER (AMAN & TIDAK KOSONG)
+# POPULER BERDASARKAN VIEW LOG
 # ==========================
 async def cerita_populer_harian(
     conn: asyncpg.Connection,
     limit: int
 ):
-    # 1️⃣ Coba cerita 1 hari terakhir
     rows = await conn.fetch(
         """
-        SELECT *
-        FROM cerita
-        WHERE created_at >= NOW() - INTERVAL '1 days'
-        ORDER BY views DESC, created_at DESC
+        SELECT c.*, COUNT(v.id) AS views_period
+        FROM cerita c
+        LEFT JOIN cerita_views_log v
+            ON v.cerita_id = c.id
+            AND v.viewed_at >= NOW() - INTERVAL '1 day'
+        GROUP BY c.id
+        ORDER BY views_period DESC, c.views DESC
         LIMIT $1
         """,
         limit
     )
-
-    # 2️⃣ Jika kosong → fallback ke populer global
-    if not rows:
-        rows = await conn.fetch(
-            """
-            SELECT *
-            FROM cerita
-            ORDER BY views DESC, created_at DESC
-            LIMIT $1
-            """,
-            limit
-        )
-
     return rows_to_list(rows)
 
 
-# ==========================
-# POPULER (AMAN & TIDAK KOSONG)
-# ==========================
 async def cerita_populer_mingguan(
     conn: asyncpg.Connection,
     limit: int
 ):
-    # 1️⃣ Coba cerita 7 hari terakhir
     rows = await conn.fetch(
         """
-        SELECT *
-        FROM cerita
-        WHERE created_at >= NOW() - INTERVAL '7 days'
-        ORDER BY views DESC, created_at DESC
+        SELECT c.*, COUNT(v.id) AS views_period
+        FROM cerita c
+        LEFT JOIN cerita_views_log v
+            ON v.cerita_id = c.id
+            AND v.viewed_at >= NOW() - INTERVAL '7 day'
+        GROUP BY c.id
+        ORDER BY views_period DESC, c.views DESC
         LIMIT $1
         """,
         limit
     )
-
-    # 2️⃣ Jika kosong → fallback ke populer global
-    if not rows:
-        rows = await conn.fetch(
-            """
-            SELECT *
-            FROM cerita
-            ORDER BY views DESC, created_at DESC
-            LIMIT $1
-            """,
-            limit
-        )
-
     return rows_to_list(rows)
 
 
@@ -258,30 +239,19 @@ async def cerita_populer_bulanan(
     conn: asyncpg.Connection,
     limit: int
 ):
-    # 1️⃣ Coba cerita 30 hari terakhir
     rows = await conn.fetch(
         """
-        SELECT *
-        FROM cerita
-        WHERE created_at >= NOW() - INTERVAL '30 days'
-        ORDER BY views DESC, created_at DESC
+        SELECT c.*, COUNT(v.id) AS views_period
+        FROM cerita c
+        LEFT JOIN cerita_views_log v
+            ON v.cerita_id = c.id
+            AND v.viewed_at >= NOW() - INTERVAL '30 day'
+        GROUP BY c.id
+        ORDER BY views_period DESC, c.views DESC
         LIMIT $1
         """,
         limit
     )
-
-    # 2️⃣ Jika kosong → fallback ke populer global
-    if not rows:
-        rows = await conn.fetch(
-            """
-            SELECT *
-            FROM cerita
-            ORDER BY views DESC, created_at DESC
-            LIMIT $1
-            """,
-            limit
-        )
-
     return rows_to_list(rows)
 
 
