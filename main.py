@@ -356,15 +356,7 @@ async def home(
         if len(slider) >= 5:
             break
 
-    # ==========================
-    # TOP CERITA PER GENRE (KODE ASLI, TIDAK DIUBAH)
-    # ==========================
-    top_cerita_per_genre = {}
-    for genre in genres:
-        items = await list_cerita_by_genre(conn, genre, 4, 0)
-        if items:
-            top_cerita_per_genre[genre] = items
-
+    
     menu = [
         {"nama": "Semua", "icon": "/static/icon/menu1.jpg"},
         {"nama": "Genre", "icon": "/static/icon/menu2.jpg"},
@@ -382,9 +374,8 @@ async def home(
         "populer_harian": {"nama": "Populer Harian", "lihat": "Lainnya", "url_lain": "/cerita/populer/harian", "items": populer_harian},
         "populer_mingguan": {"nama": "Populer Mingguan", "lihat": "Lainnya", "url_lain": "/cerita/populer/mingguan", "items": populer_mingguan},
         "populer_bulanan": {"nama": "Populer Bulanan", "lihat": "Lainnya", "url_lain": "/cerita/populer/bulanan", "items": populer_bulanan},
-        "rekomendasi": {"nama": "Rekomendasi", "lihat": "Lainnya", "url_lain": "/cerita/rekomendasi", "items": rekomendasi_items},
-        "genres": genres,
-        "top_cerita_per_genre": top_cerita_per_genre
+        "rekomendasi": {"nama": "Rekomendasi", "lihat": "Lainnya", "url_lain": "/cerita/rekomendasi", "items": rekomendasi_items}
+        
     }
 
 
