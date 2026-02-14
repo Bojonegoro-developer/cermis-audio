@@ -238,7 +238,7 @@ async def rekomendasi(
 # ==========================
 # SEARCH
 # ==========================
-@app.get("/cerita/cari")
+@app.get("/cari")
 async def cerita_cari(
     q: str,
     page: int = Query(1, ge=1),
@@ -360,8 +360,7 @@ async def home(
     menu = [
         {"nama": "Semua", "icon": "/static/icon/menu1.jpg"},
         {"nama": "Genre", "icon": "/static/icon/menu2.jpg"},
-        {"nama": "Kebijakan", "icon": "/static/icon/menu3.jpg"},
-        {"nama": "Cari Cerita", "icon": "/static/icon/menu4.jpg"}
+        {"nama": "Kebijakan", "icon": "/static/icon/menu3.jpg"}
     ]
 
     return {
