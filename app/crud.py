@@ -225,7 +225,7 @@ async def cerita_populer_mingguan(
         FROM cerita c
         LEFT JOIN cerita_views_log v
             ON v.cerita_id = c.id
-            AND v.viewed_at >= NOW() - INTERVAL '7 day'
+            AND v.viewed_at >= NOW() - INTERVAL '1 week'
         GROUP BY c.id
         ORDER BY views_period DESC, c.views DESC
         LIMIT $1
@@ -245,7 +245,7 @@ async def cerita_populer_bulanan(
         FROM cerita c
         LEFT JOIN cerita_views_log v
             ON v.cerita_id = c.id
-            AND v.viewed_at >= NOW() - INTERVAL '30 day'
+            AND v.viewed_at >= NOW() - INTERVAL '1 month'
         GROUP BY c.id
         ORDER BY views_period DESC, c.views DESC
         LIMIT $1
